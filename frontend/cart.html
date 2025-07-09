@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart - MyStore</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(45deg, #ffd1dc, #d8bfd8, #b2f2bb);
+            background-size: 300% 300%;
+            animation: gradientAnimation 10s ease infinite;
+            color: #333333;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #cart, #address-form {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 40px auto;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+            color: #333333;
+        }
+
+        #cart-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 20px;
+        }
+
+        .cart-item-details {
+            flex: 1;
+        }
+
+        .cart-item-details p {
+            margin: 5px 0;
+        }
+
+        .cart-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .cart-item-actions button {
+            background-color: #ff4d4d;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .cart-total {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background-color: #b2f2bb;
+            color: #333333;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px;
+        }
+
+        #address-form input, #address-form textarea {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <section id="cart">
+        <h2>Your Cart</h2>
+        <div id="cart-container"></div>
+        <div class="cart-total">
+            <p>Total: $<span id="total-price">0.00</span></p>
+            <button class="btn" onclick="buyNow()">Buy Now</button>
+            <button class="btn" onclick="showAddressForm()">Add Address</button>
+        </div>
+    </section>
+
+    <section id="address-form" style="display: none;">
+        <h2>Add Address</h2>
+        <input type="text" id="address-name" placeholder="Name">
+        <textarea id="address-details" placeholder="Full Address"></textarea>
+        <button class="btn" onclick="saveAddress()">Save Address</button>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const cartContainer = document.getElementById('cart-container');
+            const totalPriceElement = document.getElementById('total-price');
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                const discountedPrice = item.price * 0.9; // 10% discount
+                total += discountedPrice * item.quantity;
+                const cartItem = document.createElement('div');
+                cartItem.className = 'cart-item';
+                cartItem.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}">
+                    <div class="cart-item-details">
+                        <p><strong>${item.name}</strong></p>
+                        <p>Price: $${item.price.toFixed(2)}</p>
+                        <p>Discounted Price: $${discountedPrice.toFixed(2)}</p>
+                        <p>Quantity: ${item.quantity}</p>
+                    </div>
+                    <div class="cart-item-actions">
+                        <button onclick="removeFromCart(${index})">Remove</button>
+                    </div>
+                `;
+                cartContainer.appendChild(cartItem);
+            });
+
+            totalPriceElement.textContent = total.toFixed(2);
+        });
+
+        function removeFromCart(index) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart.splice(index, 1); // Remove the item at the specified index
+            localStorage.setItem('cart', JSON.stringify(cart));
+            location.reload(); // Reload the page to update the cart display
+        }
+
+        function buyNow() {
+            window.location.href = "checkout.html";
+        }
+
+        function showAddressForm() {
+            document.getElementById('address-form').style.display = 'block';
+        }
+
+        async function saveAddress() {
+            const name = document.getElementById('address-name').value;
+            const details = document.getElementById('address-details').value;
+            const token = localStorage.getItem('token');
+
+            if (name && details && token) {
+                try {
+                    const response = await fetch('http://localhost:5000/api/addresses', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ name, details })
+                    });
+
+                    if (response.ok) {
+                        alert('Address saved successfully!');
+                        location.reload();
+                    } else {
+                        const data = await response.json();
+                        alert(data.message || 'Failed to save address.');
+                    }
+                } catch (error) {
+                    console.error('Error saving address:', error);
+                    alert('An error occurred while saving the address.');
+                }
+            } else {
+                alert('Please fill in all fields and ensure you are logged in.');
+            }
+        }
+    </script>
+</body>
+</html>

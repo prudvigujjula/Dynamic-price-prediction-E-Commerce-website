@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce Marketing Suite</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- For charts -->
+</head>
+<body>
+    <div id="dashboard">
+        <header>
+            <h1>E-Commerce Marketing Suite</h1>
+            <div class="status-bar">
+                <span id="connection-status">Connected</span>
+                <span id="last-updated">Last Updated: --</span>
+            </div>
+        </header>
+
+        <!-- Module 1: Real-Time Insights -->
+        <section id="geo-pulse" class="module">
+            <h2>Real-Time Insights</h2>
+            <div class="module-box">
+                <canvas id="sales-chart" height="200"></canvas>
+                <div id="heatmap" class="metric">Active Users: 0</div>
+            </div>
+        </section>
+
+        <!-- Module 2: Pricing Control -->
+        <section id="pricing-engine" class="module">
+            <h2>Pricing Control</h2>
+            <div class="module-box">
+                <label>Current Price: <span id="price-output">$50</span></label>
+                <input type="range" id="price-slider" min="10" max="100" value="50">
+                <div class="toggle-container">
+                    <label>Auto-Adjust Pricing</label>
+                    <input type="checkbox" id="auto-price-toggle">
+                </div>
+                <button id="apply-price" class="action-btn">Update Price</button>
+            </div>
+        </section>
+
+        <!-- Module 3: Influencer Management -->
+        <section id="influencer-hub" class="module">
+            <h2>Influencer Management</h2>
+            <div class="module-box">
+                <div id="influencer-list">Loading influencers...</div>
+                <button id="export-influencers" class="action-btn secondary">Export Data</button>
+            </div>
+        </section>
+
+        <!-- Module 4: Campaign Studio -->
+        <section id="content-reactor" class="module">
+            <h2>Campaign Studio</h2>
+            <div class="module-box">
+                <input type="file" id="content-upload" accept="image/*">
+                <div id="content-preview">Upload campaign asset...</div>
+                <button id="deploy-campaign" class="action-btn">Deploy Campaign</button>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

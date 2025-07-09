@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Pricing - Geo Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7fa;
+            padding: 20px;
+        }
+        
+        .pricing-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .input-section {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            color: #34495e;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dcdcdc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .output-section {
+            padding: 20px;
+            display: none;
+        }
+        
+        .output-section h2 {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .price-details p {
+            margin: 10px 0;
+            color: #7f8c8d;
+        }
+        
+        .price-details .final {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .price-details .final span {
+            color: #e74c3c;
+            font-size: 24px;
+        }
+        
+        .basis {
+            font-style: italic;
+            color: #95a5a6;
+        }
+    </style>
+</head>
+<body>
+    <div class="pricing-container">
+        <h1>Dynamic Pricing Calculator</h1>
+        
+        <section class="input-section">
+            <div class="input-group">
+                <label for="product">Product Category:</label>
+                <select id="product" name="product">
+                    <option value="electronics">Electronics</option>
+                    <option value="clothing">Clothing</option>
+                    <option value="furniture">Furniture</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="location">Delivery Location:</label>
+                <input type="text" id="location" name="location" placeholder="e.g., New York" required>
+            </div>
+            
+            <button id="getPrice">Get Dynamic Price</button>
+        </section>
+        
+        <section id="priceOutput" class="output-section">
+            <h2>Price Breakdown</h2>
+            <div class="price-details">
+                <p>Base Price: <span id="basePriceOutput"></span></p>
+                <p>Geographical Adjustment: <span id="geoAdjustOutput"></span></p>
+                <p>Delivery Cost: <span id="deliveryCostOutput"></span></p>
+                <p class="final">Final Price: <span id="finalPriceOutput"></span></p>
+                <p class="basis">Pricing Basis: <span id="basisOutput"></span></p>
+            </div>
+        </section>
+    </div>
+    
+    <script>
+        document.getElementById('getPrice').addEventListener('click', async () => {
+            const product = document.getElementById('product').value;
+            const location = document.getElementById('location').value.trim();
+        
+            if (!location) {
+                alert('Please enter a location');
+                return;
+            }
+        
+            try {
+                const response = await fetch('http://localhost:5000/calculate-price', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ product, location }),
+                });
+        
+                const data = await response.json();
+                const outputSection = document.getElementById('priceOutput');
+        
+                document.getElementById('basePriceOutput').textContent = `$${data.basePrice.toLocaleString()}`;
+                document.getElementById('geoAdjustOutput').textContent = `${data.geoAdjustment >= 0 ? '+' : ''}$${data.geoAdjustment.toLocaleString()}`;
+                document.getElementById('deliveryCostOutput').textContent = `$${data.deliveryCost.toLocaleString()}`;
+                document.getElementById('finalPriceOutput').textContent = `$${data.finalPrice.toLocaleString()}`;
+                document.getElementById('basisOutput').textContent = data.basis;
+        
+                outputSection.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to calculate price. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

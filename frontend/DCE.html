@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Cost Estimator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+       /* Global Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0d1b2a, #1b263b);
+    color: #e0e0e0;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Main Container */
+.container {
+    background: rgba(17, 25, 40, 0.9);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0px 0px 15px rgba(0, 255, 255, 0.2);
+    max-width: 850px;
+    margin: auto;
+}
+
+/* Headings */
+h2 {
+    font-size: 28px;
+    color: #4db8ff;
+    margin-bottom: 15px;
+}
+
+/* Labels */
+label {
+    font-weight: bold;
+    font-size: 16px;
+    color: #b0bec5;
+}
+
+/* Inputs & Select */
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin: 12px 0;
+    border: none;
+    border-radius: 12px;
+    outline: none;
+    font-size: 16px;
+    background: #2c3e50;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Button */
+button {
+    background: #1565c0;
+    color: white;
+    padding: 14px 22px;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0px 5px 15px rgba(21, 101, 192, 0.5);
+}
+
+button:hover {
+    background: #0d47a1;
+    transform: scale(1.05);
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #1c2833;
+    border-radius: 12px;
+    box-shadow: 0px 4px 15px rgba(0, 255, 255, 0.2);
+}
+
+th, td {
+    padding: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+th {
+    background: #2a3d53;
+    color: #4db8ff;
+    font-size: 17px;
+}
+
+td {
+    font-size: 15px;
+    color: white;
+}
+
+tr:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Chart Section */
+#costChart {
+    background: #1c2833;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0px 4px 18px rgba(0, 255, 255, 0.2);
+}
+
+/* Chart Fix */
+canvas {
+    background: transparent !important;
+}
+ 
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🚚 Delivery Cost Estimator</h2>
+
+        <label>Region:</label>
+        <select id="region">
+            <option value="North">North</option>
+            <option value="South">South</option>
+            <option value="East">East</option>
+            <option value="West">West</option>
+        </select>
+
+        <label>Distance (km):</label>
+        <input type="number" id="distance" placeholder="Enter distance">
+
+        <label>Weight (kg):</label>
+        <input type="number" id="weight" placeholder="Enter weight">
+
+        <button onclick="calculateCost()">Calculate Cost</button>
+
+        <h3>Delivery Records</h3>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Region</th>
+                    <th>Distance (km)</th>
+                    <th>Weight (kg)</th>
+                    <th>Base Price ($)</th>
+                    <th>Total Cost ($)</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <h3>📊 Cost Insights</h3>
+        <canvas id="costChart"></canvas>
+    </div>
+
+    <script>
+        async function calculateCost() {
+            const region = document.getElementById("region").value;
+            const distance = parseFloat(document.getElementById("distance").value);
+            const weight = parseFloat(document.getElementById("weight").value);
+        
+            // 🛑 Check for empty inputs
+            if (isNaN(distance) || isNaN(weight)) {
+                alert("Please enter valid distance and weight values.");
+                return;
+            }
+        
+            try {
+                const response = await fetch('http://localhost:5000/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ region, distance_km: distance, weight_kg: weight })
+                });
+        
+                if (!response.ok) {
+                    throw new Error(`Failed to calculate cost: ${response.statusText}`);
+                }
+        
+                console.log("Cost calculated successfully!");
+                await loadData();  // 🔄 Refresh table after calculating cost
+        
+            } catch (error) {
+                console.error("Error in calculateCost:", error);
+                alert("Error: Could not connect to the server.");
+            }
+        }
+        
+        async function loadData() {
+            try {
+                const response = await fetch('http://localhost:5000/data');
+                if (!response.ok) throw new Error("Failed to load data.");
+                
+                const data = await response.json();
+        
+                const tableBody = document.querySelector("#dataTable tbody");
+                tableBody.innerHTML = "";  // Clear table before inserting new rows
+        
+                data.forEach(row => {
+                    const newRow = document.createElement("tr");
+                    newRow.innerHTML = `
+                        <td>${row.region}</td>
+                        <td>${row.distance_km} km</td>
+                        <td>${row.weight_kg} kg</td>
+                        <td>$${parseFloat(row.base_price).toFixed(2)}</td>
+                        <td class="${row.total_cost > 50 ? 'highlight' : ''}">$${parseFloat(row.total_cost).toFixed(2)}</td>
+                        <td>${new Date(row.timestamp).toLocaleString()}</td>
+                    `;
+                    tableBody.appendChild(newRow);
+                });
+        
+                await loadChart();  // 📊 Load chart after updating table
+        
+            } catch (error) {
+                console.error("❌ Error in loadData:", error);
+                alert("❌ Error: Could not load delivery data.");
+            }
+        }
+        
+        
+        let costChart = null; // 🔄 Store chart instance to prevent duplication
+        
+        async function loadChart() {
+            try {
+                const response = await fetch('http://localhost:5000/summary');
+                if (!response.ok) throw new Error("Failed to load chart data.");
+        
+                const summaryData = await response.json();
+        
+                const labels = summaryData.map(row => row.region);
+                const values = summaryData.map(row => row.avg_cost);
+        
+                // 🛑 Destroy old chart before creating a new one
+                if (costChart) {
+                    costChart.destroy();
+                }
+        
+                costChart = new Chart(document.getElementById('costChart'), {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{ label: 'Avg Cost ($)', data: values, backgroundColor: 'blue' }]
+                    }
+                });
+        
+            } catch (error) {
+                console.error("Error in loadChart:", error);
+                alert("Error: Could not load cost insights.");
+            }
+        }
+        
+        // Load data on page startup
+        document.addEventListener("DOMContentLoaded", loadData);
+        
+    </script>
+</body>
+</html>

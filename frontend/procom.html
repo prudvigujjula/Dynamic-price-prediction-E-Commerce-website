@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Price Comparison</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: #333;
+            overflow: auto; /* Allow scrolling */
+        }
+
+        /* Background Animation - Gradient Transition */
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Background Animation - Blinking Stars */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .background .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: blink 2s infinite ease-in-out;
+        }
+
+        @keyframes blink {
+            0%, 100% {
+                opacity: 0.5;
+                transform: scale(0.2);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(3.0);
+            }
+        }
+
+        /* Header Section */
+        .header {
+            background: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+            color: #333;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        /* Container for Filters and Products */
+        .container {
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 20px auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Filters Section */
+        .filters {
+            width: 250px;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .filters h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .filters label {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+            font-size: 16px;
+        }
+
+        .filters input, .filters select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 16px;
+        }
+
+        .filters button {
+            width: 100%;
+            padding: 12px;
+            background-color: #6c5ce7; /* Pastel purple */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .filters button:hover {
+            background-color: #5a4acf; /* Darker pastel purple */
+        }
+
+        /* Products Section */
+        .products {
+            flex-grow: 1;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .products h2 {
+            margin-top: 0;
+            color: #333;
+            font-size: 28px;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-bar input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 16px;
+        }
+
+        .search-bar button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #6c5ce7; /* Pastel purple */
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-bar button:hover {
+            background-color: #5a4acf; /* Darker pastel purple */
+        }
+
+        /* Product Cards */
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .product-card h3 {
+            margin: 0;
+            color: #333;
+            font-size: 20px;
+        }
+
+        .product-card p {
+            margin: 5px 0;
+            color: #555;
+            font-size: 16px;
+        }
+
+        .product-card .price {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #6c5ce7; /* Pastel purple */
+        }
+
+        .product-card .avg-price {
+            color: #888;
+        }
+
+        .product-card .best-price {
+            color: #00b894; /* Pastel green */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation - Blinking Stars -->
+    <div class="background">
+        <!-- Stars will be generated dynamically -->
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <h1>Product Price Comparison</h1>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Filters Section -->
+        <div class="filters">
+            <h3>Filters</h3>
+            <label for="category">Category</label>
+            <select id="category">
+                <option value="">All Categories</option>
+            </select>
+            <label for="minPrice">Min Price</label>
+            <input type="number" id="minPrice" placeholder="Min Price">
+            <label for="maxPrice">Max Price</label>
+            <input type="number" id="maxPrice" placeholder="Max Price">
+            <button onclick="applyFilters()">Apply Filters</button>
+        </div>
+
+        <!-- Products Section -->
+        <div class="products">
+            <h2>Product Comparison</h2>
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search for a product...">
+                <button onclick="searchProduct()">Search</button>
+            </div>
+            <!-- Product Dropdown -->
+            <label for="productSelect">Select a Product:</label>
+            <select id="productSelect" onchange="fetchProductComparison()">
+                <option value="">-- Select a Product --</option>
+            </select>
+            <!-- Comparison Results -->
+            <div id="comparison-results">
+                <h3>Comparison Results</h3>
+                <div id="products-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate blinking stars dynamically
+        const background = document.querySelector('.background');
+        const starCount = 200; // Number of stars
+
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.animationDelay = `${Math.random() * 2}s`;
+            star.style.animationDuration = `${Math.random() * 2 + 1}s`;
+            background.appendChild(star);
+        }
+
+        // Fetch and display categories
+        fetch('http://localhost:5000/user/categories')
+            .then(response => response.json())
+            .then(data => {
+                const categorySelect = document.getElementById('category');
+                data.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.name;
+                    option.textContent = category.name;
+                    categorySelect.appendChild(option);
+                });
+            });
+
+        // Fetch and populate product dropdown
+        function fetchProductsForDropdown() {
+            fetch('http://localhost:5000/user/products')
+                .then(response => response.json())
+                .then(data => {
+                    const productSelect = document.getElementById('productSelect');
+                    const uniqueProducts = [...new Set(data.map(product => product.name))];
+                    uniqueProducts.forEach(product => {
+                        const option = document.createElement('option');
+                        option.value = product;
+                        option.textContent = product;
+                        productSelect.appendChild(option);
+                    });
+                });
+        }
+
+        // Fetch and display product comparison
+        function fetchProductComparison() {
+            const selectedProduct = document.getElementById('productSelect').value;
+            if (!selectedProduct) {
+                alert("Please select a product.");
+                return;
+            }
+        
+            fetch(`http://localhost:5000/user/products?name=${encodeURIComponent(selectedProduct)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const productsContainer = document.getElementById('products-container');
+                    productsContainer.innerHTML = '';
+        
+                    if (data.length === 0) {
+                        productsContainer.innerHTML = "<p>No products found.</p>";
+                        return;
+                    }
+        
+                    // Convert prices to numbers for correct comparison
+                    const minPrice = Math.min(...data.map(p => parseFloat(p.price)));
+        
+                    data.forEach(product => {
+                        const card = document.createElement('div');
+                        card.className = 'product-card';
+        
+                        const isBestPrice = parseFloat(product.price) === minPrice;
+        
+                        card.innerHTML = `
+                            <div>
+                                <h3>${product.name}</h3>
+                                <p>${product.company}</p>
+                                <p class="avg-price">Market Avg: $${parseFloat(product.avg_price).toFixed(2)}</p>
+                            </div>
+                            <div>
+                                <p class="price">$${parseFloat(product.price).toFixed(2)}</p>
+                                ${isBestPrice ? '<p class="best-price">Best Price!</p>' : ''}
+                            </div>
+                        `;
+                        productsContainer.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error("❌ Error fetching product comparison:", error);
+                    productsContainer.innerHTML = "<p>Error fetching product data.</p>";
+                });
+        }
+        
+
+        // Search for a product
+        function searchProduct() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            if (!searchTerm) {
+                alert("Please enter a product name.");
+                return;
+            }
+        
+            fetch(`http://localhost:5000/user/products?name=${encodeURIComponent(searchTerm)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const productsContainer = document.getElementById('products-container');
+                    productsContainer.innerHTML = '';
+        
+                    if (data.length === 0) {
+                        productsContainer.innerHTML = "<p>No products found.</p>";
+                        return;
+                    }
+        
+                    // Convert prices to numbers for correct comparison
+                    const minPrice = Math.min(...data.map(p => parseFloat(p.price)));
+        
+                    data.forEach(product => {
+                        const card = document.createElement('div');
+                        card.className = 'product-card';
+        
+                        const isBestPrice = parseFloat(product.price) === minPrice;
+        
+                        card.innerHTML = `
+                            <div>
+                                <h3>${product.name}</h3>
+                                <p>${product.company}</p>
+                                <p class="avg-price">Market Avg: $${parseFloat(product.avg_price).toFixed(2)}</p>
+                            </div>
+                            <div>
+                                <p class="price">$${parseFloat(product.price).toFixed(2)}</p>
+                                ${isBestPrice ? '<p class="best-price">Best Price!</p>' : ''}
+                            </div>
+                        `;
+                        productsContainer.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error("❌ Error fetching search results:", error);
+                    productsContainer.innerHTML = "<p>Error fetching search results.</p>";
+                });
+        }
+        
+
+        // Apply filters
+        function applyFilters() {
+            const category = document.getElementById('category').value;
+            const minPrice = document.getElementById('minPrice').value;
+            const maxPrice = document.getElementById('maxPrice').value;
+            fetch(`http://localhost:5000/user/products?category=${category}&minPrice=${minPrice}&maxPrice=${maxPrice}`)
+                .then(response => response.json())
+                .then(data => {
+                    const productsContainer = document.getElementById('products-container');
+                    productsContainer.innerHTML = '';
+                    data.forEach(product => {
+                        const card = document.createElement('div');
+                        card.className = 'product-card';
+                        const isBestPrice = parseFloat(product.price) === Math.min(...data.filter(p => p.name === product.name).map(p => parseFloat(p.price)));
+                        card.innerHTML = `
+                            <div>
+                                <h3>${product.name}</h3>
+                                <p>${product.company}</p>
+                               <p class="avg-price">Market Avg: $${parseFloat(product.avg_price).toFixed(2)}</p>
+                            </div>
+                            <div>
+                               <p class="price">$${parseFloat(product.price).toFixed(2)}</p>
+                                ${isBestPrice ? '<p class="best-price">Best Price!</p>' : ''}
+                            </div>
+                        `;
+                        productsContainer.appendChild(card);
+                    });
+                });
+        }
+
+        // Initial load
+        fetchProductsForDropdown();
+    </script>
+</body>
+</html>

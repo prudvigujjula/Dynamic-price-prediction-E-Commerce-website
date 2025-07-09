@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Recommendations</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Blinking Stars Animation */
+        .background-stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .background-stars .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: blink 2s infinite ease-in-out;
+        }
+
+        @keyframes blink {
+            0%, 100% {
+                opacity: 0.5;
+                transform: scale(0.2); /* Very small */
+            }
+            50% {
+                opacity: 1;
+                transform: scale(3.0); /* Big */
+            }
+        }
+
+        /* Light Pastel Color Scheme */
+        :root {
+            --primary-color: #f0f8ff; /* Light Pastel Blue */
+            --secondary-color: #f5f5f5; /* Light Gray */
+            --accent-color: #333333; /* Dark Gray for text */
+            --text-color: #555555; /* Medium Gray for secondary text */
+            --background-color: #ffffff; /* White background */
+            --pastel-pink: #ffd1dc; /* Pastel Pink */
+            --pastel-green: #b2f2bb; /* Pastel Green */
+            --pastel-purple: #d8bfd8; /* Pastel Purple */
+        }
+
+        /* General Styles */
+        body {
+            background: linear-gradient(45deg, var(--pastel-pink), var(--pastel-purple), var(--pastel-green));
+            background-size: 300% 300%;
+            animation: gradientAnimation 10s ease infinite;
+            color: var(--accent-color);
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Gradient Background Animation */
+        @keyframes gradientAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Hero Section */
+        .hero {
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+            color: var(--accent-color);
+            text-align: center;
+            padding: 100px 20px;
+            margin: 100px auto;
+            max-width: 1200px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px); /* Blur effect for glassmorphism */
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero-image {
+            width: 100%;
+            max-width: 800px; /* Adjust as needed */
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 30px;
+            animation: fadeInUp 1.5s ease-in-out;
+        }
+
+        .hero .btn {
+            background-color: var(--pastel-green);
+            color: var(--accent-color);
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            animation: fadeIn 2s ease-in-out;
+            transition: background-color 0.3s ease;
+        }
+
+        .hero .btn:hover {
+            background-color: #a2e8b0; /* Slightly darker pastel green */
+        }
+
+        /* Animations for Hero Section */
+        @keyframes fadeInDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Navigation Bar */
+        nav {
+            background-color: rgba(216, 191, 216, 0.8); /* Semi-transparent pastel purple */
+            color: var(--accent-color);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px); /* Blur effect for glassmorphism */
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-bar input {
+            padding: 8px;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            background-color: var(--secondary-color);
+            color: var(--accent-color);
+        }
+
+        .search-bar button {
+            padding: 8px 12px;
+            border: none;
+            background-color: var(--pastel-green);
+            color: var(--accent-color);
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .user-actions {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-actions a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        /* Dropdown Styles */
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+            min-width: 150px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            border-radius: 4px;
+            padding: 10px;
+            backdrop-filter: blur(10px); /* Glassmorphism effect */
+        }
+
+        .dropdown ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .dropdown ul li {
+            padding: 5px 0;
+            color: var(--accent-color);
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .dropdown button {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            background-color: var(--pastel-pink); /* Pastel pink for the button */
+            color: var(--accent-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown button:hover {
+            background-color: #ffb6c1; /* Slightly darker pastel pink */
+        }
+
+        .user-actions:hover .dropdown {
+            display: block;
+        }
+
+        /* Login Button in Dropdown */
+        .dropdown-login {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+            min-width: 150px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            border-radius: 4px;
+            padding: 10px;
+            backdrop-filter: blur(10px); /* Glassmorphism effect */
+        }
+
+        .dropdown-login button {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            background-color: var(--pastel-green); /* Pastel green for the login button */
+            color: var(--accent-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-login button:hover {
+            background-color: #a2e8b0; /* Slightly darker pastel green */
+        }
+
+        .user-actions:hover .dropdown-login {
+            display: block;
+        }
+
+        /* Profile Section */
+        #profile-section {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 40px auto;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        #profile-section h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+            color: var(--accent-color);
+        }
+
+        #addresses-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .address-card {
+            background-color: var(--secondary-color);
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            width: 250px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        /* Product Recommendations */
+        #today-deals, #products, #notifications, #market-trends {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 40px auto;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+            border-radius: 8px;
+            backdrop-filter: blur(10px); /* Blur effect for glassmorphism */
+        }
+
+        #today-deals h2, #products h2, #notifications h2, #market-trends h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+            color: var(--accent-color);
+        }
+
+        #today-deals-container, #products-container, #notifications-container, #market-trends-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .deal-card, .product-card, .notification-card, .trend-card {
+            background-color: var(--secondary-color);
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            width: 250px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+        }
+
+        .deal-card:hover, .product-card:hover, .notification-card:hover, .trend-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .deal-card img, .product-card img, .notification-card img, .trend-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .deal-card h3, .product-card h3, .notification-card h3, .trend-card h3 {
+            font-size: 18px;
+            margin: 10px 0;
+            color: var(--accent-color);
+        }
+
+        .deal-card p, .product-card p, .notification-card p, .trend-card p {
+            margin: 5px 0;
+            color: var(--text-color);
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .new-price {
+            color: var(--pastel-green);
+            font-weight: bold;
+        }
+
+        .score {
+            color: #2ecc71; /* Green */
+            font-weight: bold;
+        }
+
+        .deal-card .btn, .product-card .btn {
+            background-color: var(--pastel-green);
+            color: var(--accent-color);
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        /* Footer */
+        footer {
+            background-color: rgba(216, 191, 216, 0.8); /* Semi-transparent pastel purple */
+            color: var(--accent-color);
+            padding: 40px 20px;
+            margin-top: 40px;
+            backdrop-filter: blur(10px); /* Blur effect for glassmorphism */
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-section {
+            flex: 1;
+            margin: 0 20px;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-section ul li a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation - Blinking Stars -->
+    <div class="background-stars">
+        <!-- Stars will be generated dynamically -->
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">MyStore</div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search for products...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            <div class="nav-links">
+                <a href="home.html">Home</a>
+                <a href="procom.html">Products</a>
+                <a href="DCE.html">Delivery Cost Estimation</a>
+                <a href="#">Trends</a>
+            </div>
+            <div class="user-actions">
+                <a href="#" id="profile-icon"><i class="fas fa-user"></i></a>
+                <!-- Dropdown for logged-in user -->
+                <div class="dropdown" id="profile-dropdown">
+                    <ul>
+                        <li id="dropdown-firstName"></li>
+                        <li id="dropdown-lastName"></li>
+                        <li><a href="cart.html"><i class="fas fa-shopping-cart"></i> Cart</a></li>
+                        <button onclick="logout()">Logout</button>
+                    </ul>
+                </div>
+                <!-- Dropdown for not logged-in user -->
+                <div class="dropdown-login" id="login-dropdown">
+                    <button onclick="goToLogin()">Login</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Section -->
+    <section id="profile-section">
+        <h2>Profile</h2>
+        <p>Username: <span id="username"></span></p>
+        <h3>Your Addresses</h3>
+        <div id="addresses-container"></div>
+    </section>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <img id="hero-image" src="center.jpg" alt="Hero Image" class="hero-image">
+            <p>Discover Product Price Comparison</p>
+            <a href="procom.html" class="btn">Check Now</a>
+        </div>
+    </section>
+
+    <!-- Today's Deals Section -->
+    <section id="today-deals">
+        <h2>Today's Deals</h2>
+        <div id="today-deals-container">
+            <!-- Products will be dynamically inserted here -->
+        </div>
+    </section>
+
+    <!-- Product Recommendations -->
+    <section id="products">
+        <h2>Recommended Products</h2>
+        <div id="products-container">
+            <!-- Products will be dynamically inserted here -->
+        </div>
+    </section>
+
+    <!-- Notifications -->
+    <section id="notifications">
+        <h2>Notifications</h2>
+        <div id="notifications-container">
+            <!-- Notifications will be dynamically inserted here -->
+        </div>
+    </section>
+
+    <!-- Market Trends -->
+    <section id="market-trends">
+        <h2>Market Trends</h2>
+        <div id="market-trends-container">
+            <!-- Market trends will be dynamically inserted here -->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>We are a leading e-commerce platform offering the best products at affordable prices.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="procom.html">Products</a></li>
+                    <li><a href="#">Notifications</a></li>
+                    <li><a href="#">Trends</a></li>
+                    <li><a href="login.html">Login</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p>Email: support@mystore.com</p>
+                <p>Phone: +1 234 567 890</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2023 MyStore. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Check login status
+            const token = localStorage.getItem('token');
+            const profileDropdown = document.getElementById('profile-dropdown');
+            const loginDropdown = document.getElementById('login-dropdown');
+            const profileSection = document.getElementById('profile-section');
+
+            if (token) {
+                try {
+                    // Fetch user details from the backend
+                    const response = await fetch('http://localhost:5000/api/user', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const userData = await response.json();
+                        // User is logged in
+                        profileDropdown.style.display = 'block';
+                        loginDropdown.style.display = 'none';
+                        profileSection.style.display = 'block';
+
+                        // Populate dropdown with user data
+                        document.getElementById('dropdown-firstName').textContent = userData.firstname;
+                        document.getElementById('dropdown-lastName').textContent = userData.lastname;
+
+                        // Update profile section username
+                        document.getElementById('username').textContent = `${userData.firstname} ${userData.lastname}`;
+
+                        // Fetch and display addresses
+                        try {
+                            const addressResponse = await fetch('http://localhost:5000/api/addresses', {
+                                headers: {
+                                    'Authorization': `Bearer ${token}`
+                                }
+                            });
+                            const addresses = await addressResponse.json();
+                            const addressesContainer = document.getElementById('addresses-container');
+                            addresses.forEach(address => {
+                                const addressCard = document.createElement('div');
+                                addressCard.className = 'address-card';
+                                addressCard.innerHTML = `<p><strong>${address.name}</strong>: ${address.details}</p>`;
+                                addressesContainer.appendChild(addressCard);
+                            });
+                        } catch (error) {
+                            console.error('Error fetching addresses:', error);
+                        }
+                    } else {
+                        // Invalid token, log out the user
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        localStorage.removeItem('cart');
+                        profileDropdown.style.display = 'none';
+                        loginDropdown.style.display = 'block';
+                        profileSection.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('cart');
+                    profileDropdown.style.display = 'none';
+                    loginDropdown.style.display = 'block';
+                    profileSection.style.display = 'none';
+                }
+            } else {
+                // User is not logged in
+                profileDropdown.style.display = 'none';
+                loginDropdown.style.display = 'block';
+                profileSection.style.display = 'none';
+            }
+
+            // Generate blinking stars dynamically
+            const backgroundStars = document.querySelector('.background-stars');
+            const starCount = 200; // Number of stars
+
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 2}s`;
+                star.style.animationDuration = `${Math.random() * 2 + 1}s`;
+                backgroundStars.appendChild(star);
+            }
+
+            // Fetch and display today's deals from the backend
+            try {
+                const response = await fetch('http://localhost:5000/api/products');
+                const deals = await response.json();
+                const todayDealsContainer = document.getElementById('today-deals-container');
+                deals.forEach(deal => {
+                    const card = document.createElement('div');
+                    card.className = 'deal-card';
+                    card.innerHTML = `
+                        <img src="http://localhost:5000/uploads/${deal.image}" alt="${deal.name}">
+                        <h3>${deal.name}</h3>
+                        <p class="new-price">Price: $${deal.price}</p>
+                        <button class="btn" onclick="addToCart(${deal.id}, '${deal.name}', ${deal.price}, 'http://localhost:5000/uploads/${deal.image}')">Add to Cart</button>
+                    `;
+                    todayDealsContainer.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error fetching products:', error);
+            }
+
+            // Cart functionality
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            window.addToCart = function (id, name, price, image) {
+                const item = { id, name, price, image, quantity: 1 };
+                const existingItem = cart.find(i => i.id === id);
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    cart.push(item);
+                }
+                localStorage.setItem('cart', JSON.stringify(cart));
+                alert(`${name} added to cart!`);
+            };
+
+            // Hardcoded Recommended Products
+            const products = [
+                {
+                    name: "Smartphone X",
+                    original_price: 999.99,
+                    new_price: 849.99,
+                    recommended_score: 15,
+                    image: "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                },
+                {
+                    name: "Laptop Pro",
+                    original_price: 1499.99,
+                    new_price: 1349.99,
+                    recommended_score: 10,
+                    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                },
+                {
+                    name: "Wireless Earbuds",
+                    original_price: 199.99,
+                    new_price: 159.99,
+                    recommended_score: 20,
+                    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                },
+                {
+                    name: "Smart Watch",
+                    original_price: 299.99,
+                    new_price: 224.99,
+                    recommended_score: 25,
+                    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                },
+                {
+                    name: "Tablet Mini",
+                    original_price: 499.99,
+                    new_price: 349.99,
+                    recommended_score: 30,
+                    image: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                }
+            ];
+
+            const productsContainer = document.getElementById('products-container');
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}">
+                    <h3>${product.name}</h3>
+                    <p class="original-price">Original Price: $${product.original_price.toFixed(2)}</p>
+                    <p class="new-price">New Price: $${product.new_price.toFixed(2)}</p>
+                    <p class="score">Score: ${product.recommended_score}</p>
+                    <button class="btn">Add to Cart</button>
+                `;
+                productsContainer.appendChild(card);
+            });
+
+            // Fetch and display notifications
+            const notifications = [
+                {
+                    message: "Smartphone X is now available at a discounted price!",
+                    image: "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                },
+                {
+                    message: "Laptop Pro has a new recommended price. Check it out!",
+                    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                },
+                {
+                    message: "Wireless Earbuds are now 20% off!",
+                    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                },
+                {
+                    message: "Smart Watch is now available at a special price.",
+                    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                },
+                {
+                    message: "Tablet Mini has a new price based on market trends.",
+                    image: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                }
+            ];
+
+            const notificationsContainer = document.getElementById('notifications-container');
+            notifications.forEach(notification => {
+                const card = document.createElement('div');
+                card.className = 'notification-card';
+                card.innerHTML = `
+                    <img src="${notification.image}" alt="Notification">
+                    <h3>Notification</h3>
+                    <p>${notification.message}</p>
+                `;
+                notificationsContainer.appendChild(card);
+            });
+
+            // Fetch and display market trends
+            const trends = [
+                {
+                    trend_name: "Increased demand for electronics",
+                    impact_score: 15,
+                    image: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                },
+                {
+                    trend_name: "Holiday season discounts",
+                    impact_score: 20,
+                    image: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                },
+                {
+                    trend_name: "New product launches",
+                    impact_score: 10,
+                    image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                },
+                {
+                    trend_name: "Supply chain improvements",
+                    impact_score: 5,
+                    image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                },
+                {
+                    trend_name: "Competitor price drops",
+                    impact_score: 25,
+                    image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                }
+            ];
+
+            const trendsContainer = document.getElementById('market-trends-container');
+            trends.forEach(trend => {
+                const card = document.createElement('div');
+                card.className = 'trend-card';
+                card.innerHTML = `
+                    <img src="${trend.image}" alt="Market Trend">
+                    <h3>${trend.trend_name}</h3>
+                    <p>Impact Score: ${trend.impact_score}</p>
+                `;
+                trendsContainer.appendChild(card);
+            });
+
+            // Image Loop Functionality
+            const heroImage = document.getElementById('hero-image');
+            const images = ['center.jpg', 'center1.jpg']; // Add more images if needed
+            let currentIndex = 0;
+
+            function changeImage() {
+                heroImage.src = images[currentIndex];
+                currentIndex = (currentIndex + 1) % images.length;
+            }
+
+            setInterval(changeImage, 3000);
+        });
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('cart');
+            window.location.href = 'login.html';
+        }
+
+        // Go to login page function
+        function goToLogin() {
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

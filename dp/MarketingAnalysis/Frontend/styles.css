@@ -1,0 +1,201 @@
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #f4f7fa;
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+    padding: 40px;
+}
+
+/* Dashboard Container */
+#dashboard {
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+h1 {
+    font-size: 2.5em;
+    font-weight: 900;
+    color: #1a73e8;
+}
+
+.status-bar {
+    font-size: 1em;
+    color: #666;
+}
+
+#connection-status {
+    color: #34c759;
+    font-weight: 700;
+}
+
+#last-updated {
+    margin-left: 20px;
+}
+
+/* Module Styling */
+.module {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 30px;
+    margin: 20px 0;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease;
+}
+
+.module:hover {
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+}
+
+h2 {
+    font-size: 1.7em;
+    font-weight: 700;
+    color: #1a73e8;
+    margin-bottom: 20px;
+}
+
+/* Module Boxes */
+.module-box {
+    padding: 20px;
+    background: #fafafa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.metric {
+    font-size: 1.3em;
+    margin-top: 15px;
+    color: #333;
+}
+
+/* Chart Styling */
+canvas {
+    max-width: 100%;
+}
+
+/* Pricing Controls */
+#price-output {
+    font-weight: 700;
+    color: #34c759;
+}
+
+input[type="range"] {
+    width: 100%;
+    margin: 20px 0;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 5px;
+    outline: none;
+    accent-color: #1a73e8;
+    cursor: pointer;
+}
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+}
+
+.toggle-container label {
+    margin-right: 10px;
+    color: #666;
+}
+
+input[type="checkbox"] {
+    appearance: none;
+    width: 40px;
+    height: 20px;
+    background: #ccc;
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+input[type="checkbox"]:checked {
+    background: #1a73e8;
+}
+
+input[type="checkbox"]::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s ease;
+}
+
+input[type="checkbox"]:checked::after {
+    transform: translateX(20px);
+}
+
+/* Influencer List */
+#influencer-list div {
+    margin: 10px 0;
+    padding: 10px;
+    background: #f0f0f0;
+    border-radius: 6px;
+}
+
+/* Content Upload */
+input[type="file"] {
+    display: block;
+    margin: 20px 0;
+    padding: 12px;
+    background: #f0f0f0;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.module-box img {
+    max-width: 100%;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+/* Action Buttons */
+.action-btn {
+    padding: 12px 25px;
+    background: #1a73e8;
+    border: none;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 1.1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.action-btn:hover {
+    background: #1557b0;
+    transform: translateY(-2px);
+}
+
+.secondary {
+    background: #666;
+}
+
+.secondary:hover {
+    background: #4d4d4d;
+}

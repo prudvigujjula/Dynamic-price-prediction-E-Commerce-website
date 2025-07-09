@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Data Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>/* 🌍 Stylish Sales Data Visualization */
+
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #141E30, #243B55); /* Gradient Background */
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        
+        h2 {
+            font-size: 2.5rem;
+            margin: 20px 0;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #ff9a9e;
+            background: -webkit-linear-gradient(45deg, #ff9a9e, #fad0c4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* 🗺️ Map Container - Glassmorphism Effect */
+        #map {
+            height: 550px;
+            width: 80%;
+            margin: auto;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        #map:hover {
+            transform: scale(1.02);
+        }
+        
+        /* 🎯 Custom Marker Popups */
+        .leaflet-popup-content {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #222;
+        }
+        
+        /* 🌍 Dark-themed Map */
+        .leaflet-container {
+            background: #1e1e1e !important;
+        }
+        
+        /* 📊 Custom Legend */
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 15px;
+            font-size: 14px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .legend span {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+            border-radius: 50%;
+        }
+        
+        /* 📱 Responsive Design */
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 2rem;
+            }
+            #map {
+                width: 90%;
+                height: 450px;
+            }
+            .legend {
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+        }
+        </style>
+</head>
+<body>
+    <h2>Sales Performance</h2>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>document.addEventListener("DOMContentLoaded", () => {
+        const map = L.map('map').setView([20.5937, 78.9629], 5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+    
+        fetch('http://localhost:5000/sales')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(sale => {
+                    const color = sale.revenue > 45000 ? 'red' : sale.revenue > 40000 ? 'orange' : 'green';
+                    L.circleMarker([sale.latitude, sale.longitude], {
+                        radius: 10,
+                        color: color,
+                        fillOpacity: 0.6
+                    }).bindPopup(`<b>${sale.city}, ${sale.state}</b><br>Revenue: ₹${sale.revenue}`).addTo(map);
+                });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    });
+    </script>
+</body>
+</html>

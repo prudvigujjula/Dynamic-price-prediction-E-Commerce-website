@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Demand Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #1a2526; /* Deep teal-gray */
+    color: #e0e6e6; /* Soft off-white */
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* Dashboard Wrapper */
+.dashboard-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background: url('https://www.transparenttextures.com/patterns/dark-mosaic.png') repeat;
+}
+
+/* Main Container */
+.container {
+    max-width: 1400px;
+    width: 100%;
+    background: rgba(34, 48, 51, 0.9); /* Dark teal */
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Header */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+h1 {
+    font-size: 2.8em;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #ffffff;
+    text-shadow: 0 2px 8px rgba(0, 128, 141, 0.3);
+    animation: fadeIn 1.5s ease-in-out;
+}
+
+/* Charts Section */
+.charts-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 25px;
+}
+
+.chart-container {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    height: 450px; /* Fixed height for consistency */
+}
+
+.chart-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+}
+
+.chart-container h2 {
+    font-size: 1.4em;
+    font-weight: 600;
+    color: #223033; /* Dark teal-gray */
+    text-align: center;
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 1;
+}
+
+.chart-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 128, 141, 0.1), transparent);
+    opacity: 0.4;
+    z-index: 0;
+    animation: glow 5s infinite alternate;
+}
+
+.chart-container canvas {
+    width: 100%;
+    height: 100%; /* Fill container naturally */
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glow {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+}
+
+/* Responsive Design */
+@media (max-width: 1366px) {
+    .container { 
+        max-width: 1200px; 
+        padding: 20px; 
+    }
+    .charts-section { 
+        grid-template-columns: 1fr; 
+    }
+    h1 { 
+        font-size: 2.2em; 
+    }
+}
+
+@media (max-width: 768px) {
+    .chart-container { 
+        padding: 15px; 
+        height: 400px; /* Slightly smaller for smaller screens */
+    }
+    h1 { 
+        font-size: 1.8em; 
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <div class="container">
+            <header class="dashboard-header">
+                <h1>Product Demand Dashboard</h1>
+            </header>
+            <section class="charts-section">
+                <div class="chart-container" id="demand-chart">
+                    <h2>Urban vs Rural Demand (Total)</h2>
+                    <canvas id="demandChart"></canvas>
+                </div>
+                <div class="chart-container" id="trends-chart">
+                    <h2>Demand Trends Over Time</h2>
+                    <canvas id="trendsChart"></canvas>
+                </div>
+                <div class="chart-container" id="inventory-chart">
+                    <h2>Inventory Requirements (Urban vs Rural)</h2>
+                    <canvas id="inventoryChart"></canvas>
+                </div>
+            </section>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+        const socket = io('http://localhost:5000');
+        let demandChart, trendsChart, inventoryChart;
+
+        // Fetch initial data
+        fetch('http://localhost:5000/api/sales')
+            .then(response => response.json())
+            .then(data => renderDemandChart(data))
+            .catch(error => console.error('Error fetching sales:', error));
+
+        fetch('http://localhost:5000/api/sales-trends')
+            .then(response => response.json())
+            .then(data => renderTrendsChart(data))
+            .catch(error => console.error('Error fetching trends:', error));
+
+        fetch('http://localhost:5000/api/inventory-requirements')
+            .then(response => response.json())
+            .then(data => renderInventoryChart(data))
+            .catch(error => console.error('Error fetching inventory:', error));
+
+        // Real-time updates
+        socket.on('salesUpdate', (data) => renderDemandChart(data));
+        socket.on('trendsUpdate', (data) => renderTrendsChart(data));
+        socket.on('inventoryUpdate', (data) => renderInventoryChart(data));
+
+        // Render bar chart for total demand (Subtask 1)
+        function renderDemandChart(data) {
+            const ctx = document.getElementById('demandChart').getContext('2d');
+            const products = [...new Set(data.map(item => item.product_name))];
+            const urbanData = products.map(product => {
+                const entry = data.find(d => d.product_name === product && d.region_type === 'urban');
+                return entry ? entry.total_sold : 0;
+            });
+            const ruralData = products.map(product => {
+                const entry = data.find(d => d.product_name === product && d.region_type === 'rural');
+                return entry ? entry.total_sold : 0;
+            });
+
+            if (demandChart) demandChart.destroy();
+
+            demandChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: products,
+                    datasets: [
+                        { label: 'Urban Demand', data: urbanData, backgroundColor: 'rgba(54, 162, 235, 0.7)', borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 1 },
+                        { label: 'Rural Demand', data: ruralData, backgroundColor: 'rgba(75, 192, 192, 0.7)', borderColor: 'rgba(75, 192, 192, 1)', borderWidth: 1 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    devicePixelRatio: window.devicePixelRatio || 1, // Use native DPI
+                    scales: { 
+                        y: { beginAtZero: true, title: { display: true, text: 'Units Sold' } }, 
+                        x: { title: { display: true, text: 'Products' } }
+                    },
+                    plugins: { legend: { position: 'top' }, title: { display: false } }
+                }
+            });
+        }
+
+        // Render line chart for demand trends (Subtask 2)
+        function renderTrendsChart(data) {
+            const ctx = document.getElementById('trendsChart').getContext('2d');
+            const dates = [...new Set(data.map(item => item.sale_date))];
+            const products = [...new Set(data.map(item => item.product_name))];
+
+            const datasets = [];
+            products.forEach(product => {
+                const urbanData = dates.map(date => {
+                    const entry = data.find(d => d.product_name === product && d.region_type === 'urban' && d.sale_date === date);
+                    return entry ? entry.total_sold : 0;
+                });
+                const ruralData = dates.map(date => {
+                    const entry = data.find(d => d.product_name === product && d.region_type === 'rural' && d.sale_date === date);
+                    return entry ? entry.total_sold : 0;
+                });
+
+                datasets.push({ label: `${product} (Urban)`, data: urbanData, borderColor: 'rgba(54, 162, 235, 1)', fill: false, tension: 0.1 });
+                datasets.push({ label: `${product} (Rural)`, data: ruralData, borderColor: 'rgba(75, 192, 192, 1)', fill: false, tension: 0.1 });
+            });
+
+            if (trendsChart) trendsChart.destroy();
+
+            trendsChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: dates, datasets: datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    devicePixelRatio: window.devicePixelRatio || 1,
+                    scales: { 
+                        y: { beginAtZero: true, title: { display: true, text: 'Units Sold' } }, 
+                        x: { title: { display: true, text: 'Date' } }
+                    },
+                    plugins: { legend: { position: 'top' }, title: { display: false } }
+                }
+            });
+        }
+
+        // Render bar chart for inventory requirements (Subtask 3)
+        function renderInventoryChart(data) {
+            const ctx = document.getElementById('inventoryChart').getContext('2d');
+            const products = [...new Set(data.map(item => item.product_name))];
+            const urbanData = products.map(product => {
+                const entry = data.find(d => d.product_name === product && d.region_type === 'urban');
+                return entry ? entry.inventory_requirement : 0;
+            });
+            const ruralData = products.map(product => {
+                const entry = data.find(d => d.product_name === product && d.region_type === 'rural');
+                return entry ? entry.inventory_requirement : 0;
+            });
+
+            if (inventoryChart) inventoryChart.destroy();
+
+            inventoryChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: products,
+                    datasets: [
+                        { label: 'Urban Inventory', data: urbanData, backgroundColor: 'rgba(255, 99, 132, 0.7)', borderColor: 'rgba(255, 99, 132, 1)', borderWidth: 1 },
+                        { label: 'Rural Inventory', data: ruralData, backgroundColor: 'rgba(255, 159, 64, 0.7)', borderColor: 'rgba(255, 159, 64, 1)', borderWidth: 1 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    devicePixelRatio: window.devicePixelRatio || 1,
+                    scales: { 
+                        y: { beginAtZero: true, title: { display: true, text: 'Units Required' } }, 
+                        x: { title: { display: true, text: 'Products' } }
+                    },
+                    plugins: { legend: { position: 'top' }, title: { display: false } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

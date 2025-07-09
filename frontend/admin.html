@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Product Management</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f1f3f6;
+            height: 100vh;
+            padding-top: 70px; /* space for navbar */
+          }
+        .navbar {
+            background: #2e3636;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+          }
+          .navbar .logo { font-size: 22px; font-weight: bold; }
+          .navbar .search-box {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 5px;
+            border-radius: 4px;
+            margin: 0 20px;
+            max-width: 600px;
+          }
+          .search-box input { width: 100%; border: none; outline: none; padding: 8px; }
+          .search-box button { background: none; border: none; cursor: pointer; color: #2874F0; font-size: 18px; }
+          .navbar .menu { display: flex; align-items: center; gap: 30px; }
+          .menu a { color: white; text-decoration: none; font-size: 16px; padding: 8px 12px; border-radius: 4px; }
+          .menu a:hover { background: rgba(255, 255, 255, 0.2); }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #292626;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .action-btn {
+            cursor: pointer;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+        }
+        .edit-btn {
+            background:  #292626;
+            color: white;
+        }
+        .delete-btn {
+            background: #292626;
+            color: white;
+        }
+        img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body onload="displayProducts()">
+    <div class="navbar">
+        <div class="logo">E-COMMERCE <span style="font-size:12px; font-weight:normal;">DPP</span></div>
+        <div class="search-box">
+            <input type="text" placeholder="Search for products, brands and more" />
+            <button>🔍</button>
+          </div>
+        <div class="menu">
+          <a href="adminlogin.html" target="_blank">Login</a>
+          <a href="admin.html" target="_blank">Home</a>
+          <a href="index.html" target="_blank">Monitor the sales</a>
+          <a href="map.html" target="_blank">Geographical Analysis</a>
+          <a href="/dp/new/frontend/Product_demand.html" target="_blank">PDA</a>
+          <a href="/dp/MarketingAnalysis/Frontend/index.html" target="_blank">MA</a>
+          <a href="DPP.html" target="_blank">DPC</a>
+        </div>
+      </div>
+    <div class="container">
+        <h2>Admin - Add Product</h2>
+        <input type="text" id="productName" placeholder="Product Name">
+        <input type="text" id="productType" placeholder="Product Type">
+        <input type="text" id="productCategory" placeholder="Product Category">
+        <input type="number" id="productPrice" placeholder="Product Price">
+        <input type="number" id="productStock" placeholder="Product Stock">
+        <input type="file" id="productImage" accept="image/*">
+        <button onclick="addProduct()">Add Product</button>
+        
+        <h2>Product List</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="productTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        function addProduct() {
+            let formData = new FormData();
+            formData.append("name", document.getElementById("productName").value);
+            formData.append("type", document.getElementById("productType").value);
+            formData.append("category", document.getElementById("productCategory").value);
+            formData.append("price", document.getElementById("productPrice").value);
+            formData.append("stock", document.getElementById("productStock").value);
+            formData.append("image", document.getElementById("productImage").files[0]);
+        
+            fetch("http://localhost:5000/add", {
+                method: "POST",
+                body: formData
+            }).then(response => response.json())
+            .then(() => {
+                alert("Product added successfully!");
+                clearFields();
+                displayProducts();
+            }).catch(error => console.error("Error:", error));
+        }
+
+        function displayProducts() {
+            fetch('http://localhost:5000/products')
+            .then(response => response.json())
+            .then(products => {
+                let tableBody = document.getElementById("productTable");
+                tableBody.innerHTML = "";
+                products.forEach(product => {
+                    let row = `<tr>
+                        <td><img src="http://localhost:5000/uploads/${product.image}" alt="Product Image"></td>
+                        <td>${product.name}</td>
+                        <td>${product.type}</td>
+                        <td>${product.category}</td>
+                        <td>${product.price}</td>
+                        <td>${product.stock}</td>
+                        <td>
+                            <button class="action-btn edit-btn" onclick="editProduct(${product.id})">Edit</button>
+                            <button class="action-btn delete-btn" onclick="deleteProduct(${product.id})">Delete</button>
+                        </td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            });
+        }
+        function editProduct(id) {
+            fetch(`http://localhost:5000/product/${id}`)
+            .then(response => response.json())
+            .then(product => {
+                let price = prompt("Enter new price:", product.price);
+                let stock = prompt("Enter new stock:", product.stock);
+        
+                if (price !== null && stock !== null) {
+                    let formData = new FormData();
+                    formData.append("name", product.name);
+                    formData.append("type", product.type);
+                    formData.append("category", product.category);
+                    formData.append("price", price);
+                    formData.append("stock", stock);
+        
+                    fetch(`http://localhost:5000/update/${id}`, {
+                        method: "PUT",
+                        body: formData
+                    }).then(() => displayProducts());
+                }
+            }).catch(error => console.error("Error:", error));
+        }
+        
+        function deleteProduct(id) {
+            if (confirm("Are you sure you want to delete this product?")) {
+                fetch(`http://localhost:5000/delete/${id}`, {
+                    method: "DELETE"
+                }).then(response => response.json())
+                .then(data => {
+                    alert(data.message || "Product deleted successfully!");
+                    displayProducts();
+                }).catch(error => console.error("Error:", error));
+            }
+        }
+        
+        function clearFields() {
+            document.getElementById("productName").value = "";
+            document.getElementById("productType").value = "";
+            document.getElementById("productCategory").value = "";
+            document.getElementById("productPrice").value = "";
+            document.getElementById("productStock").value = "";
+            document.getElementById("productImage").value = "";
+        }
+    </script>
+</body>
+</html>

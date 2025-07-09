@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Page</title>
+  <style>
+    /* Basic styling and Flipkart-style navbar */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    .navbar {
+      background: #2e3636;
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+    }
+    .navbar .logo { font-size: 22px; font-weight: bold; }
+    .navbar .search-box {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: white;
+      padding: 5px;
+      border-radius: 4px;
+      margin: 0 20px;
+      max-width: 600px;
+    }
+    .search-box input { width: 100%; border: none; outline: none; padding: 8px; }
+    .search-box button { background: none; border: none; cursor: pointer; color: #2874F0; font-size: 18px; }
+    .navbar .menu { display: flex; align-items: center; gap: 30px; }
+    .menu a { color: white; text-decoration: none; font-size: 16px; padding: 8px 12px; border-radius: 4px; }
+    .menu a:hover { background: rgba(255, 255, 255, 0.2); }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #f1f3f6;
+      height: 100vh;
+      padding-top: 70px; /* space for navbar */
+    }
+    .container {
+      display: flex;
+      width: 700px;
+      height: 400px;
+      background: white;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 50px;
+    }
+    .left-section {
+      width: 40%;
+      background: #2e3636;
+      color: white;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .left-section h2 { font-size: 24px; margin-bottom: 10px; }
+    .left-section p { font-size: 14px; opacity: 0.9; }
+    .right-section {
+      width: 60%;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .input-box {
+      width: 100%;
+      margin: 15px 0;
+      padding: 10px;
+      border: 1px solid #dcdcdc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 10px;
+      background: #3b3030;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    .submit-btn:hover { background: #3d3737; }
+    .terms { font-size: 12px; color: #555; margin: 10px 0; }
+    .terms a { color: #2874F0; text-decoration: none; }
+    .signup-link { text-align: center; font-size: 14px; margin-top: 15px; }
+    .signup-link a { color: #2874F0; text-decoration: none; font-weight: bold; }
+    .fplink { text-align: center; font-size: 14px; margin-top: 15px; }
+    .fplink a { color: #2874F0; text-decoration: none; font-weight: bold; }
+    @media (max-width: 768px) {
+      .container { flex-direction: column; height: auto; width: 90%; }
+      .left-section, .right-section { width: 100%; padding: 20px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  
+
+  <!-- Login Container -->
+  <div class="container">
+    <!-- Left Banner -->
+    <div class="left-section">
+      <h2>Login</h2>
+      <p>Get access to your Products, sales Analysis, and Geographical Analysis</p>
+    </div>
+    <!-- Login Form -->
+    <div class="right-section">
+      <form id="loginForm" method="POST">
+        <input type="email" id="email" name="email" class="input-box" placeholder="Enter Email" required />
+        <input type="password" id="password" name="password" class="input-box" placeholder="Enter Password" required />
+        <button type="submit" class="submit-btn">Submit</button>
+        <p class="fplink" ><a href="adminforgot-password.html">Forgot Password?</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- JavaScript for handling login -->
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async function(event){
+      event.preventDefault(); // Stop the default form submission
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      
+      try {
+        const response = await fetch("http://localhost:5000/admin/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+          // Store token if needed and redirect
+          localStorage.setItem("token", result.token);
+          window.location.href = "admin.html";  
+        } else {
+          alert(result.message);
+        }
+      } catch (error) {
+        console.error("Error during login:", error);
+        alert("An error occurred. Please try again.");
+      }
+    })
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Recommendations</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Existing styles remain unchanged */
+        /* Add styles for the profile in the nav bar and profile section */
+        .user-profile {
+            display: none; /* Hidden by default */
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-profile span {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .user-profile a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        #profile-section {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 40px auto;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            display: none; /* Hidden by default */
+        }
+
+        #profile-section h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+            color: var(--accent-color);
+        }
+
+        #addresses-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .address-card {
+            background-color: var(--secondary-color);
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            width: 250px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation - Blinking Stars -->
+    <div class="background-stars">
+        <!-- Stars will be generated dynamically -->
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">MyStore</div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search for products...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            <div class="nav-links">
+                <a href="home.html">Home</a>
+                <a href="procom.html">Products</a>
+                <a href="DCE.html">Delivery Cost Estimation</a>
+                <a href="#">Trends</a>
+                <a href="login.html" id="login-link">Login</a>
+                <a href="cart.html">🛒 Cart</a>
+            </div>
+            <div class="user-actions">
+                <div class="user-profile" id="user-profile">
+                    <span id="user-name"></span>
+                    <a href="#" onclick="logout()">Logout</a>
+                </div>
+                <a href="#"><i class="fas fa-user"></i></a>
+                <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Section -->
+    <section id="profile-section">
+        <h2>Profile</h2>
+        <p>Username: <span id="username"></span></p>
+        <h3>Your Addresses</h3>
+        <div id="addresses-container"></div>
+    </section>
+
+    <!-- Existing sections (hero, products, notifications, market-trends, today-deals, footer) -->
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <img id="hero-image" src="center.jpg" alt="Hero Image" class="hero-image">
+            <p>Discover Product Price Comparison</p>
+            <a href="procom.html" class="btn">Check Now</a>
+        </div>
+    </section>
+
+    <!-- Today's Deals Section -->
+    <section id="today-deals">
+        <h2>Today's Deals</h2>
+        <div id="today-deals-container">
+            <!-- Products will be dynamically inserted here -->
+        </div>
+    </section>
+
+    <!-- Product Recommendations -->
+    <section id="products">
+        <h2>Recommended Products</h2>
+        <div id="products-container">
+            <!-- Products will be dynamically inserted here -->
+        </div>
+    </section>
+
+    <!-- Notifications -->
+    <section id="notifications">
+        <h2>Notifications</h2>
+        <div id="notifications-container">
+            <!-- Notifications will be dynamically inserted here -->
+        </div>
+    </section>
+
+    <!-- Market Trends -->
+    <section id="market-trends">
+        <h2>Market Trends</h2>
+        <div id="market-trends-container">
+            <!-- Market trends will be dynamically inserted here -->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>We are a leading e-commerce platform offering the best products at affordable prices.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="procom.html">Products</a></li>
+                    <li><a href="#">Notifications</a></li>
+                    <li><a href="#">Trends</a></li>
+                    <li><a href="login.html">Login</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p>Email: support@mystore.com</p>
+                <p>Phone: +1 234 567 890</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2023 MyStore. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const USER_ID = "12345"; // Simulated user ID
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Check login status
+            const user = JSON.parse(localStorage.getItem('user'));
+            const userProfile = document.getElementById('user-profile');
+            const loginLink = document.getElementById('login-link');
+            const profileSection = document.getElementById('profile-section');
+
+            if (user) {
+                // User is logged in
+                userProfile.style.display = 'flex';
+                loginLink.style.display = 'none';
+                document.getElementById('user-name').textContent = `${user.firstName} ${user.lastName}`;
+                profileSection.style.display = 'block';
+
+                // Fetch user profile from backend
+                const userResponse = await fetch(`http://localhost:3000/api/user/${USER_ID}`);
+                const userData = await userResponse.json();
+                document.getElementById('username').textContent = `${userData.firstName} ${userData.lastName}`;
+
+                // Fetch and display addresses
+                const addressResponse = await fetch(`http://localhost:3000/api/addresses/${USER_ID}`);
+                const addresses = await addressResponse.json();
+                const addressesContainer = document.getElementById('addresses-container');
+                addresses.forEach(address => {
+                    const addressCard = document.createElement('div');
+                    addressCard.className = 'address-card';
+                    addressCard.innerHTML = `<p><strong>${address.name}</strong>: ${address.details}</p>`;
+                    addressesContainer.appendChild(addressCard);
+                });
+            } else {
+                // User is not logged in
+                userProfile.style.display = 'none';
+                loginLink.style.display = 'inline';
+                profileSection.style.display = 'none';
+            }
+
+            // Existing JavaScript for stars, products, notifications, trends, today-deals, and hero image loop
+            const backgroundStars = document.querySelector('.background-stars');
+            const starCount = 200;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 2}s`;
+                star.style.animationDuration = `${Math.random() * 2 + 1}s`;
+                backgroundStars.appendChild(star);
+            }
+
+            const response = await fetch('http://localhost:3000/api/products');
+            const deals = await response.json();
+            const todayDealsContainer = document.getElementById('today-deals-container');
+            deals.forEach(deal => {
+                const card = document.createElement('div');
+                card.className = 'deal-card';
+                card.innerHTML = `
+                    <img src="${deal.image}" alt="${deal.name}">
+                    <h3>${deal.name}</h3>
+                    <p class="price">${deal.price}</p>
+                    <button class="btn" onclick="addToCart(${deal.id}, '${deal.name}', ${deal.price}, '${deal.image}')">Add to Cart</button>
+                    <button class="btn view-btn" onclick="viewInfo('${deal.name}')">View</button>
+                `;
+                todayDealsContainer.appendChild(card);
+            });
+
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            window.addToCart = function (id, name, price, image) {
+                const item = { id, name, price, image, quantity: 1 };
+                const existingItem = cart.find(i => i.id === id);
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    cart.push(item);
+                }
+                localStorage.setItem('cart', JSON.stringify(cart));
+                alert(`${name} added to cart!`);
+            };
+
+            window.viewInfo = function (name) {
+                alert(`More info about ${name} will be displayed here.`);
+            };
+
+            window.logout = function () {
+                localStorage.removeItem('user');
+                location.reload();
+            };
+
+            // Existing code for other sections (products, notifications, market-trends, hero image loop)
+        });
+    </script>
+</body>
+</html>
